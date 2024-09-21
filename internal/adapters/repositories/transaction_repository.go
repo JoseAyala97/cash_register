@@ -23,7 +23,7 @@ func NewTransactionRepository(db *gorm.DB) TransactionRepository {
 	return &transactionRepository{db: db}
 }
 
-// BeginTransaction starts a new transaction using GORM
+// BeginTransaction inicia una transacción
 func (r *transactionRepository) BeginTransaction(ctx context.Context) (*gorm.DB, error) {
 	tx := r.db.Begin()
 	if tx.Error != nil {
@@ -32,7 +32,7 @@ func (r *transactionRepository) BeginTransaction(ctx context.Context) (*gorm.DB,
 	return tx, nil
 }
 
-// CommitTransaction commits the current transaction
+// CommitTransaction permite confirmar una transacción
 func (r *transactionRepository) CommitTransaction(tx *gorm.DB) error {
 	if tx == nil {
 		return errors.New("no active transaction")
@@ -40,7 +40,7 @@ func (r *transactionRepository) CommitTransaction(tx *gorm.DB) error {
 	return tx.Commit().Error
 }
 
-// RollbackTransaction rolls back the current transaction
+// RollbackTransaction - no inserta nada en caso de error
 func (r *transactionRepository) RollbackTransaction(tx *gorm.DB) error {
 	if tx == nil {
 		return errors.New("no active transaction")
@@ -48,8 +48,7 @@ func (r *transactionRepository) RollbackTransaction(tx *gorm.DB) error {
 	return tx.Rollback().Error
 }
 
-// CreateTransaction inserts a new transaction into the database
-// GORM will automatically set the ID for the transaction after it is inserted
+// CreateTransaction inserta una nueva transacción en la base de datos
 func (r *transactionRepository) CreateTransaction(tx *gorm.DB, transaction *models.Transaction) error {
 	if tx == nil {
 		return errors.New("no active transaction")

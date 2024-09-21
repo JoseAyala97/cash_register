@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"cash_register/internal/adapters/dtos"
-	"cash_register/internal/domain/models"
 	"cash_register/internal/usecases"
 	"net/http"
 
@@ -29,17 +28,14 @@ func (h *TransactionHandler) RegisterTransaction(c *gin.Context) {
 		return
 	}
 
-	// Crear la entidad Transaction
-	transaction := models.Transaction{
-		TransactionTypeId: transactionDTO.TransactionTypeId,
-	}
-
-	// Registrar la transacción con detalles (se calculará el TotalAmount en el Usecase)
-	err := h.transactionRegisterUsecase.RegisterTransaction(c.Request.Context(), &transaction, transactionDTO.Details)
+	// Enviar la transacción al caso de uso para procesarla
+	err := h.transactionRegisterUsecase.RegisterTransaction(c.Request.Context(), transactionDTO)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo registrar la transacción"})
+		// Enviar una respuesta HTTP con el error si ocurre un fallo al registrar
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
+	// Devolver una respuesta exitosa
 	c.JSON(http.StatusCreated, gin.H{"message": "Transacción registrada exitosamente"})
 }
