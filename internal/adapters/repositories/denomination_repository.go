@@ -23,7 +23,12 @@ func NewDenominationRepository(db *gorm.DB) *DenominationRepositoryImpl {
 // Obtener todas las denominaciones
 func (r *DenominationRepositoryImpl) GetAll() ([]models.Denomination, error) {
 	var denominations []models.Denomination
-	if err := r.db.Find(&denominations).Error; err != nil {
+	err := r.
+		db.
+		Preload("MoneyType").
+		Find(&denominations).
+		Error
+	if err != nil {
 		return nil, err
 	}
 	return denominations, nil

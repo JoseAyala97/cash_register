@@ -32,15 +32,20 @@ func main() {
 
 	log.Println("Migración de tablas completada")
 
-	// Crear el repositorio y el usecase
+	// Crear repositorios genéricos
 	denominationRepo := repositories.NewDenominationRepository(db)
-	denominationUsecase := usecases.NewDenominationUsecase(denominationRepo)
+	moneyTypeRepo := repositories.NewGenericRepository[models.MoneyType](db)
 
-	// Crear el handler inyectando el usecase
+	// Crear los usecases inyectando los repositorios genéricos
+	denominationUsecase := usecases.NewDenominationUsecase(denominationRepo)
+	moneyTypeUsecase := usecases.NewMoneyTypeUsecase(moneyTypeRepo)
+
+	// Crear los handlers inyectando los usecases
 	denominationHandler := handlers.NewDenominationHandler(denominationUsecase)
+	moneyTypeHandler := handlers.NewMoneyTypeHandler(moneyTypeUsecase)
 
 	// Configurar las rutas con los handlers
-	router := http.SetupRouter(denominationHandler)
+	router := http.SetupRouter(denominationHandler, moneyTypeHandler)
 
 	err = router.Run(":8080") // Aquí inicia el servidor y lo mantiene activo
 	if err != nil {

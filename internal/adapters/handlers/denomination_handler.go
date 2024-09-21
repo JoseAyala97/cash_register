@@ -21,12 +21,13 @@ func NewDenominationHandler(usecase *usecases.DenominationUsecase) *Denomination
 
 // Obtener todas las denominaciones
 func (h *DenominationHandler) GetAllDenominations(c *gin.Context) {
-	denominations, err := h.usecase.GetAllDenominations()
+	denominationViews, err := h.usecase.GetAllDenominations()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener denominaciones"})
 		return
 	}
-	c.JSON(http.StatusOK, denominations)
+
+	c.JSON(http.StatusOK, denominationViews)
 }
 
 // Crear una nueva denominación
