@@ -53,11 +53,11 @@ func main() {
 	denominationHandler := handlers.NewDenominationHandler(denominationUsecase)
 	moneyTypeHandler := handlers.NewMoneyTypeHandler(moneyTypeUsecase)
 	transactionTypeHandler := handlers.NewTransactionTypeHandler(transactionTypeUsecase)
-
 	transactionHandler := handlers.NewTransactionHandler(transactionRegisterUsecase)
+	currentRegisterHandler := handlers.NewCurrentRegisterHandler(usecases.NewCurrentRegisterUsecase(currentRegisterRepo))
 
 	// Configurar las rutas con los handlers
-	router := http.SetupRouter(denominationHandler, moneyTypeHandler, transactionTypeHandler, transactionHandler)
+	router := http.SetupRouter(denominationHandler, moneyTypeHandler, transactionTypeHandler, transactionHandler, currentRegisterHandler)
 
 	err = router.Run(":8080") // Aquí inicia el servidor y lo mantiene activo
 	if err != nil {
