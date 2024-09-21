@@ -74,10 +74,8 @@ func (uc *TransactionRegister) RegisterTransaction(ctx context.Context, transact
 			uc.transactionRepo.RollbackTransaction(tx)
 			return err
 		}
-	}
 
-	// Actualizar el registro actual de caja (current_registers)
-	for _, detail := range transactionDetails {
+		// Actualizar el registro actual de caja (current_registers)
 		err = uc.currentRegisterRepo.UpdateRegister(tx, detail.DenominationId, detail.Quantity)
 		if err != nil {
 			uc.transactionRepo.RollbackTransaction(tx)
