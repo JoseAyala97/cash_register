@@ -71,7 +71,7 @@ func (r *currentRegisterRepository) GetCurrentRegister() ([]views.CurrentRegiste
 		currentRegisterViews = append(currentRegisterViews, views.CurrentRegisterView{
 			Id:       register.Id,
 			Quantity: register.Quantity,
-			DenominationView: &views.DenominationView{
+			DenominationView: views.DenominationView{
 				Id:    register.Denomination.Id,
 				Value: register.Denomination.Value,
 				MoneyType: views.MoneyTypeView{
