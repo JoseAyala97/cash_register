@@ -37,18 +37,27 @@ func main() {
 	moneyTypeRepo := repositories.NewGenericRepository[models.MoneyType](db)
 	transactionTypeRepo := repositories.NewTransactionTypeRepository(db)
 
+	transactionRepo := repositories.NewTransactionRepository(db)
+	transactionDetailRepo := repositories.NewTransactionDetailRepository(db)
+	currentRegisterRepo := repositories.NewCurrentRegisterRepository(db) // Uso correcto
+
 	// Crear los usecases inyectando los repositorios
 	denominationUsecase := usecases.NewDenominationUsecase(denominationRepo)
 	moneyTypeUsecase := usecases.NewMoneyTypeUsecase(moneyTypeRepo)
 	transactionTypeUsecase := usecases.NewTransactionTypeUsecase(transactionTypeRepo)
+
+	// Aquí pasamos el `currentRegisterRepo` en lugar de `denominationRepo` en la posición correcta
+	transactionRegisterUsecase := usecases.NewTransactionRegister(transactionRepo, transactionDetailRepo, currentRegisterRepo, denominationRepo)
 
 	// Crear los handlers inyectando los usecases
 	denominationHandler := handlers.NewDenominationHandler(denominationUsecase)
 	moneyTypeHandler := handlers.NewMoneyTypeHandler(moneyTypeUsecase)
 	transactionTypeHandler := handlers.NewTransactionTypeHandler(transactionTypeUsecase)
 
+	transactionHandler := handlers.NewTransactionHandler(transactionRegisterUsecase)
+
 	// Configurar las rutas con los handlers
-	router := http.SetupRouter(denominationHandler, moneyTypeHandler, transactionTypeHandler)
+	router := http.SetupRouter(denominationHandler, moneyTypeHandler, transactionTypeHandler, transactionHandler)
 
 	err = router.Run(":8080") // Aquí inicia el servidor y lo mantiene activo
 	if err != nil {

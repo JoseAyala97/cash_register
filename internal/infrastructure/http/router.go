@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRouter(denominationHandler *handlers.DenominationHandler, moneyTypeHandler *handlers.MoneyTypeHandler, transactionTypeHandler *handlers.TransactionTypeHandler) *gin.Engine {
+func SetupRouter(denominationHandler *handlers.DenominationHandler, moneyTypeHandler *handlers.MoneyTypeHandler, transactionTypeHandler *handlers.TransactionTypeHandler, transactionHandler *handlers.TransactionHandler) *gin.Engine {
 	router := gin.Default()
 
 	// Rutas para denominaciones
@@ -29,6 +29,9 @@ func SetupRouter(denominationHandler *handlers.DenominationHandler, moneyTypeHan
 	router.GET("/transaction_types/:id", transactionTypeHandler.GetTransactionTypeByID)
 	router.PUT("/transaction_types/:id", transactionTypeHandler.UpdateTransactionType)
 	router.DELETE("/transaction_types/:id", transactionTypeHandler.DeleteTransactionType)
+
+	// Rutas para transacciones
+	router.POST("/transactions", transactionHandler.RegisterTransaction)
 
 	return router
 }
