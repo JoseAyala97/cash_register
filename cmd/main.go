@@ -1,8 +1,12 @@
 package main
 
 import (
+	"cash_register/internal/adapters/handlers"
+	"cash_register/internal/adapters/repositories"
 	"cash_register/internal/domain/models"
 	"cash_register/internal/infrastructure/database"
+	"cash_register/internal/infrastructure/http"
+	"cash_register/internal/usecases"
 	"log"
 )
 
@@ -27,5 +31,20 @@ func main() {
 	}
 
 	log.Println("Migración de tablas completada")
+
+	// Crear el repositorio y el usecase
+	denominationRepo := repositories.NewDenominationRepository(db)
+	denominationUsecase := usecases.NewDenominationUsecase(denominationRepo)
+
+	// Crear el handler inyectando el usecase
+	denominationHandler := handlers.NewDenominationHandler(denominationUsecase)
+
+	// Configurar las rutas con los handlers
+	router := http.SetupRouter(denominationHandler)
+
+	err = router.Run(":8080") // Aquí inicia el servidor y lo mantiene activo
+	if err != nil {
+		log.Fatalf("Error al iniciar el servidor: %v", err)
+	}
 
 }
