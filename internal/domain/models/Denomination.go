@@ -7,5 +7,5 @@ type Denomination struct {
 	Id          int       `json:"id" gorm:"primaryKey"`
 	Value       float64   `json:"value" gorm:"not null"`
 	MoneyTypeId int       `json:"moneyTypeId" gorm:"not null"`
-	MoneyType   MoneyType `json:"moneyType" gorm:"foreignKey:MoneyTypeId"`
+	MoneyType   MoneyType `json:"moneyType" gorm:"foreignKey:MoneyTypeId;references:Id"`
 }

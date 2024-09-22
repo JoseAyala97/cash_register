@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRouter(denominationHandler *handlers.DenominationHandler, moneyTypeHandler *handlers.MoneyTypeHandler, transactionTypeHandler *handlers.TransactionTypeHandler, transactionHandler *handlers.TransactionHandler, currentRegisterHandler *handlers.CurrentRegisterHandler) *gin.Engine {
+func SetupRouter(denominationHandler *handlers.DenominationHandler, moneyTypeHandler *handlers.MoneyTypeHandler, transactionTypeHandler *handlers.TransactionTypeHandler, transactionHandler *handlers.TransactionHandler, currentRegisterHandler *handlers.CurrentRegisterHandler, transactionDetailsHandler *handlers.TransactionDetailHandler) *gin.Engine {
 	router := gin.Default()
 
 	// Rutas para denominaciones
@@ -31,7 +31,11 @@ func SetupRouter(denominationHandler *handlers.DenominationHandler, moneyTypeHan
 	router.DELETE("/transaction_types/:id", transactionTypeHandler.DeleteTransactionType)
 
 	// Rutas para transacciones
-	router.POST("/transactions", transactionHandler.RegisterTransaction)
+	router.POST("/transactions/simple", transactionHandler.RegisterTransaction)
+	router.POST("/transactions/payment", transactionHandler.MakePayment)
+
+	// Rutas para detalles de transacciones
+	router.GET("/transactions_details", transactionDetailsHandler.GetTransactionLogs)
 
 	// Rutas caja actual
 	router.GET("/current_register", currentRegisterHandler.GetCurrentRegister)

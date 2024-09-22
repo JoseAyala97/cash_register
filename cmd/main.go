@@ -36,17 +36,16 @@ func main() {
 	denominationRepo := repositories.NewDenominationRepository(db)
 	moneyTypeRepo := repositories.NewGenericRepository[models.MoneyType](db)
 	transactionTypeRepo := repositories.NewTransactionTypeRepository(db)
-
 	transactionRepo := repositories.NewTransactionRepository(db)
 	transactionDetailRepo := repositories.NewTransactionDetailRepository(db)
-	currentRegisterRepo := repositories.NewCurrentRegisterRepository(db) // Uso correcto
+	currentRegisterRepo := repositories.NewCurrentRegisterRepository(db)
 
 	// Crear los usecases inyectando los repositorios
 	denominationUsecase := usecases.NewDenominationUsecase(denominationRepo)
 	moneyTypeUsecase := usecases.NewMoneyTypeUsecase(moneyTypeRepo)
 	transactionTypeUsecase := usecases.NewTransactionTypeUsecase(transactionTypeRepo)
+	transactionDetailUsecase := usecases.NewTransactionDetailUsecase(transactionDetailRepo)
 
-	// Aquí pasamos el `currentRegisterRepo` en lugar de `denominationRepo` en la posición correcta
 	transactionRegisterUsecase := usecases.NewTransactionRegister(transactionRepo, transactionDetailRepo, currentRegisterRepo, denominationRepo)
 
 	// Crear los handlers inyectando los usecases
@@ -55,9 +54,10 @@ func main() {
 	transactionTypeHandler := handlers.NewTransactionTypeHandler(transactionTypeUsecase)
 	transactionHandler := handlers.NewTransactionHandler(transactionRegisterUsecase)
 	currentRegisterHandler := handlers.NewCurrentRegisterHandler(usecases.NewCurrentRegisterUsecase(currentRegisterRepo))
+	transactionDetailsHandler := handlers.NewTransactionDetailHandler(transactionDetailUsecase)
 
 	// Configurar las rutas con los handlers
-	router := http.SetupRouter(denominationHandler, moneyTypeHandler, transactionTypeHandler, transactionHandler, currentRegisterHandler)
+	router := http.SetupRouter(denominationHandler, moneyTypeHandler, transactionTypeHandler, transactionHandler, currentRegisterHandler, transactionDetailsHandler)
 
 	err = router.Run(":8080") // Aquí inicia el servidor y lo mantiene activo
 	if err != nil {

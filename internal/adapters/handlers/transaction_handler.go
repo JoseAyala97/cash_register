@@ -39,3 +39,22 @@ func (h *TransactionHandler) RegisterTransaction(c *gin.Context) {
 	// Devolver una respuesta exitosa
 	c.JSON(http.StatusCreated, gin.H{"message": "Transacción registrada exitosamente"})
 }
+func (h *TransactionHandler) MakePayment(c *gin.Context) {
+	var paymentDTO dtos.PaymentDTO
+
+	// Parsear la solicitud
+	if err := c.ShouldBindJSON(&paymentDTO); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos"})
+		return
+	}
+
+	// Procesar el pago y el cambio
+	err := h.transactionRegisterUsecase.MakePayment(c.Request.Context(), paymentDTO)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Respuesta exitosa
+	c.JSON(http.StatusCreated, gin.H{"message": "Pago registrado exitosamente, cambio devuelto"})
+}

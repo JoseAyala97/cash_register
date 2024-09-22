@@ -65,12 +65,10 @@ func (uc *TransactionRegister) RegisterTransaction(ctx context.Context, transact
 		TotalAmount:       totalAmount,
 	}
 
-	// Evaluar el tipo de transacción basado en el número
+	// Evaluar el tipo de transacción basado en el número, excluir pagos
 	switch transactionDTO.TransactionTypeId {
 	case 1: // "Ingreso Inicial"
 		err = uc.handleInitialDeposit(tx, transaction, transactionDetails)
-	case 2: // "Pago"
-		err = uc.handlePayment(tx, transaction, transactionDTO.PaidAmount, transactionDetails)
 	case 4: // "Retiro Final"
 		err = uc.handleWithdrawal(tx)
 	default:
@@ -222,4 +220,59 @@ func (uc *TransactionRegister) handleWithdrawal(tx *gorm.DB) error {
 
 	// No se necesita realizar ninguna otra acción o registrar transacciones adicionales.
 	return nil
+}
+
+func (uc *TransactionRegister) MakePayment(ctx context.Context, paymentDTO dtos.PaymentDTO) error {
+	// Iniciar la transacción en la base de datos
+	tx, err := uc.transactionRepo.BeginTransaction(ctx)
+	if err != nil {
+		return err
+	}
+
+	// Calcular el monto total pagado basado en las denominaciones proporcionadas en `paidDetails`
+	totalPaid := 0.0
+	for _, paidDetail := range paymentDTO.PaidDetails {
+		denomination, err := uc.denominationRepo.GetByID(uint(paidDetail.DenominationId))
+		if err != nil {
+			uc.transactionRepo.RollbackTransaction(tx)
+			return errors.New("denominación no encontrada en el pago")
+		}
+		totalPaid += denomination.Value * float64(paidDetail.Quantity)
+	}
+
+	// Calcular el monto total de la transacción basado en los detalles de la transacción
+	totalAmount := 0.0
+	var transactionDetails []*models.TransactionDetail
+	for _, detailDTO := range paymentDTO.Details {
+		denomination, err := uc.denominationRepo.GetByID(uint(detailDTO.DenominationId))
+		if err != nil {
+			uc.transactionRepo.RollbackTransaction(tx)
+			return errors.New("denominación no encontrada en la transacción")
+		}
+
+		amount := denomination.Value * float64(detailDTO.Quantity)
+		totalAmount += amount
+
+		transactionDetails = append(transactionDetails, &models.TransactionDetail{
+			DenominationId: detailDTO.DenominationId,
+			Quantity:       detailDTO.Quantity,
+			TotalAmount:    amount,
+		})
+	}
+
+	// Crear la transacción principal (sin detalles ni pago aún)
+	transaction := models.Transaction{
+		TransactionTypeId: paymentDTO.TransactionTypeId,
+		TotalAmount:       totalAmount,
+	}
+
+	// Utilizar handlePayment para registrar la transacción, los detalles y manejar el cambio
+	err = uc.handlePayment(tx, transaction, totalPaid, transactionDetails)
+	if err != nil {
+		uc.transactionRepo.RollbackTransaction(tx)
+		return err
+	}
+
+	// Confirmar la transacción si todo fue exitoso
+	return uc.transactionRepo.CommitTransaction(tx)
 }

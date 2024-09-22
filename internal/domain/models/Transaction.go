@@ -6,7 +6,7 @@ type Transaction struct {
 	gorm.Model
 	Id                int             `json:"id" gorm:"primaryKey"`
 	TransactionTypeId int             `json:"transactionTypeId" gorm:"not null"`
-	TransactionType   TransactionType `json:"transactionType" gorm:"foreignKey:TransactionTypeId"`
+	TransactionType   TransactionType `json:"transactionType" gorm:"foreignKey:TransactionTypeId;references:Id"`
 	TotalAmount       float64         `json:"totalAmount" gorm:"not null"`
 	PaidAmount        float64         `json:"paidAmount"`
 }
