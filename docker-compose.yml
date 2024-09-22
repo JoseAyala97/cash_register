@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cash_register_app
+    ports:
+      - "8081:8080"
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5433
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=cash_register_db
+    env_file:
+      - .env
+    networks:
+      - cash_register_network
+
+  db:
+    image: postgres:15-alpine
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: cash_register_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - cash_register_network
+
+networks:
+  cash_register_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
