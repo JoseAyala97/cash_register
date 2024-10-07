@@ -9,15 +9,17 @@ services:
     ports:
       - "8081:8080"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+
     environment:
       - DB_HOST=db
-      - DB_PORT=5433
+      - DB_PORT=5432
       - DB_USER=postgres
       - DB_PASSWORD=postgres
       - DB_NAME=cash_register_db
-    env_file:
-      - .env
+    # env_file:
+    #   - .env
     networks:
       - cash_register_network
 
@@ -28,12 +30,16 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: cash_register_db
-    ports:
-      - "5433:5432"
+      
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - cash_register_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 networks:
   cash_register_network:
